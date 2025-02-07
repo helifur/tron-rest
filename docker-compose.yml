@@ -1,0 +1,93 @@
+version: '3.7'
+
+services:
+
+    postgres:
+        container_name: postgres_container
+        image: postgres
+
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB:-postgres}
+            POSTGRES_USER: ${POSTGRES_USER:-postgres}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+            PGDATA: /var/lib/postgresql/data/pgdata
+    
+        volumes:
+            - ./pgdata:/var/lib/postgresql/data
+
+        ports:
+          - 17936:5432
+
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 10s
+
+        restart: unless-stopped
+
+        networks:
+            - postgres
+
+    pgadmin:
+        container_name: pgadmin_container
+        image: dpage/pgadmin4
+
+        depends_on:
+            - postgres
+
+        environment:
+            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin@example.com}
+            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+            PGADMIN_CONFIG_SERVER_MODE: 'False'
+
+        volumes:
+            - ./pgadmin:/var/lib/pgadmin
+
+        ports:
+            - "105:80"
+
+        networks:
+            - postgres
+
+        restart: unless-stopped
+
+networks:
+    postgres:
+        driver: bridge
+
+# ============ !!!!! ============
+# Create 'pgadmin' dir
+# mkdir pgadmin && sudo chown -R 5050:80 pgadmin
+# -------------------------------
+# Start:
+# docker-compose --compatibility up -d
+# -------------------------------
+# Access to Postgres:
+# localhost:5432
+# Username: postgres (as a default)
+# Password: changeme (as a default)
+# -------------------------------
+# Access to PgAdmin:
+# URL: http://localhost:5050
+# EMAIL: pgadmin@example.com
+# Password: admin
+# -------------------------------
+# Connect to Postgres from PgAdmin
+# Host name/address: postgres_container
+# Port: 5432
+# Maintenance DB: postgres
+# Password: changeme
+# -------------------------------
+# Stop lifted containers:
+# docker-compose --compatibility stop
+# -------------------------------
+# Start stopped containers
+# docker-compose --compatibility start
+# -------------------------------
+# Stop and delete containers and network:
+# docker-compose --compatibility down
+# -------------------------------
+# Clear project
+# sudo rm -r pgadmin pgdata
