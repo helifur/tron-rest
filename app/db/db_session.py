@@ -5,6 +5,7 @@ __factory = None
 
 
 def global_init() -> None:
+    """Initialize a database"""
     global __factory
 
     if __factory:
@@ -19,5 +20,6 @@ def global_init() -> None:
 
 
 def create_session() -> orm.Session:
+    """Create a session"""
     global __factory
     return __factory()
