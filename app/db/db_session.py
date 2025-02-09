@@ -1,7 +1,11 @@
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 
+import os
+from dotenv import load_dotenv
+
 __factory = None
+load_dotenv()
 
 
 def global_init() -> None:
@@ -11,7 +15,11 @@ def global_init() -> None:
     if __factory:
         return
 
-    engine = sa.create_engine("postgresql://postgres:changeme@localhost:17936/postgres")
+    user = os.getenv("POSTGRES_USER")
+    password = os.getenv("POSTGRES_PASSWORD")
+    db_name = os.getenv("POSTGRES_DB")
+
+    engine = sa.create_engine(f"postgresql://{user}:{password}@db:5432/{db_name}")
     __factory = orm.sessionmaker(bind=engine)
 
     from ..models import __all_models
